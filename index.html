@@ -33,7 +33,7 @@
         <div class="glass-card">
             <h2>🛡 Raven Guard Stats</h2>
             <div class="input-group"><label>НИК ПЕРСОНАЖА</label><input type="text" id="nick" placeholder="Raycks"></div>
-            <div class="input-group"><label>СТОЙКОСТЬ (ЧИСТАЯ)</label><input type="number" id="res" placeholder="1250"></div>
+            <div class="input-group"><label>СТОЙКОСТЬ</label><input type="number" id="res" placeholder="1250"></div>
             <div class="input-group"><label>ФЕНКОР (%)</label><input type="number" id="fc" value="0" step="0.1"></div>
             <div class="input-group"><label>СКУТ-ТУМ (%)</label><input type="number" id="sc" value="0" step="0.1"></div>
             <button class="btn-main" onclick="sendData()">ОТПРАВИТЬ ОТЧЕТ</button>
@@ -63,7 +63,7 @@
         }
 
         function sendData() {
-            const BOT_NAME = "@raven_resist_bot"; // Заменить на своего бота!
+            const BOT_NAME = "raven_resist_bot"; // Заменить на своего бота!
             let nick = document.getElementById('nick').value.trim();
             let res = parseFloat(document.getElementById('res').value);
             
@@ -84,7 +84,7 @@
         }
 
         function requestAction(act) {
-            const BOT_NAME = "@raven_resist_bot";
+            const BOT_NAME = "raven_resist_bot";
             let data = { a: act };
             if (act === 'delete') {
                 let d_nick = document.getElementById('del_nick').value.trim();
