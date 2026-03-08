@@ -1,58 +1,29 @@
-<script>
-    let tg = window.Telegram.WebApp;
-    tg.expand();
+function saveData() {
+    const BOT_USERNAME = "ТВОЙ_ЮЗЕРНЕЙМ_БОТА"; // Например: RavenGuardBot (без @)
     
-    // Установим цвет хедера в тон твоему новому дизайну
-    tg.headerColor = '#F5F7FA';
-
-    function execAction(act) {
-    let nick = document.getElementById('nick').value.trim();
-    let res = document.getElementById('res').value;
+    let nick = document.getElementById("nick").value.trim();
+    let res = document.getElementById("res").value;
 
     if (!nick || !res) {
-        tg.showAlert("Заполните ник и стойкость!");
+        window.Telegram.WebApp.showAlert("Заполните ник и стойкость!");
         return;
     }
 
+    // Собираем данные в объект
     let payload = {
-        nick: nick,
-        res: parseFloat(res),
-        fc: parseFloat(document.getElementById('fc').value || 0),
-        sc: parseFloat(document.getElementById('sc').value || 0)
+        n: nick,
+        r: parseFloat(res),
+        f: parseFloat(document.getElementById("fc").value || 0),
+        s: parseFloat(document.getElementById("sc").value || 0)
     };
 
-    // Кодируем данные для передачи через URL
-    let base64Data = btoa(JSON.stringify(payload));
+    // Кодируем данные в Base64, чтобы Telegram пропустил их в ссылке
+    let encodedData = btoa(JSON.stringify(payload));
     
-    // Получаем имя твоего бота (подставь своё, если другое)
-    let botUsername = "твой_ник_бота"; // Например: RavenGuardBot
+    // Формируем ссылку для перехода
+    let link = "https://t.me/" + BOT_USERNAME + "?start=" + encodedData;
 
-    // Магия: мы открываем ссылку самого бота с параметром. 
-    // Это работает даже из кнопки "Open"!
-    tg.openTelegramLink("https://t.me/" + botUsername + "?start=" + base64Data);
-    
-    tg.close(); // Закрываем окно
+    // Выполняем переход и закрываем окно
+    window.Telegram.WebApp.openTelegramLink(link);
+    window.Telegram.WebApp.close();
 }
-
-        let payload = {
-            action: act,
-            nick: nick,
-            res: parseFloat(res),
-            fc: parseFloat(document.getElementById('fc').value || 0),
-            sc: parseFloat(document.getElementById('sc').value || 0)
-        };
-
-        // Трюк для Menu Button: 
-        // Мы пытаемся отправить данные. Если мы в Menu Button, окно просто закроется.
-        // Чтобы данные дошли, бот должен уметь считывать закрытие или мы используем sendData.
-        
-        try {
-            tg.sendData(JSON.stringify(payload));
-            // Если мы тут, значит это кнопка клавиатуры и всё ок
-        } catch (e) {
-            // Если мы тут, значит это Menu Button. 
-            // В этом режиме Telegram пока не позволяет отправлять данные напрямую через JS в чат.
-            tg.showAlert("Используйте кнопку 'ОТКРЫТЬ ПАНЕЛЬ' в чате (после /start), чтобы данные отправились!");
-        }
-    }
-</script>
