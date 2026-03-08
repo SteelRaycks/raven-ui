@@ -1,96 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #0A1929; color: #fff; padding: 20px; margin: 0; }
-        .tabs { display: flex; margin-bottom: 20px; background: #132F4C; border-radius: 10px; overflow: hidden; }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; color: #5AC8FA; font-weight: bold; opacity: 0.5; }
-        .tab.active { opacity: 1; background: #1e4976; border-bottom: 3px solid #007AFF; }
-        .card { background: #132F4C; border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .content { display: none; }
-        .content.active { display: block; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #001E3C; border: 1px solid #1e4976; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; background: #007AFF; border: none; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; }
-        
-        /* Таблица рейтинга */
-        .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .rank-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .rank-row td { padding: 12px 5px; }
-        .nick { color: #E3F2FD; font-weight: bold; }
-        .rate { color: #5AC8FA; text-align: right; }
+        :root { --blue-bg: #0A1929; --blue-card: #132F4C; --blue-accent: #007AFF; --blue-light: #5AC8FA; }
+        body { font-family: -apple-system, sans-serif; background: var(--blue-bg); color: #fff; margin: 0; padding: 0; }
+        .tabs { display: flex; background: var(--blue-card); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { flex: 1; padding: 15px; text-align: center; font-size: 12px; font-weight: bold; color: var(--blue-light); opacity: 0.5; cursor: pointer; }
+        .tab.active { opacity: 1; border-bottom: 3px solid var(--blue-accent); color: #fff; }
+        .container { padding: 20px; display: none; }
+        .container.active { display: block; }
+        .card { background: var(--blue-card); border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: var(--blue-light); text-align: center; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 10px; color: var(--blue-light); margin-bottom: 5px; text-transform: uppercase; opacity: 0.8; }
+        input { width: 100%; padding: 12px; background: #001E3C; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 16px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--blue-accent); }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; background: var(--blue-accent); text-transform: uppercase; margin-top: 10px; }
+        .btn-rank { background: transparent; border: 1px solid var(--blue-accent); }
     </style>
 </head>
 <body>
-
     <div class="tabs">
-        <div id="t1" class="tab active" onclick="show('form', 't1')">АНКЕТА</div>
-        <div id="t2" class="tab" onclick="show('rank', 't2')">РЕЙТИНГ</div>
-    </div>
-
-    <div id="form" class="content active">
-        <div class="card">
-            <h3 style="text-align:center; margin:0 0 15px 0;">🦅 ВВОД ДАННЫХ</h3>
-            <input type="text" id="nick" placeholder="Ваш ник">
-            <input type="number" id="res" placeholder="Стойкость">
-            <input type="number" id="fc" value="0" placeholder="Фенкор %">
-            <input type="number" id="sc" value="0" placeholder="Скут-Тум %">
-            <button class="btn" onclick="sendData()">ОТПРАВИТЬ</button>
-        </div>
-    </div>
-
-    <div id="rank" class="content">
-        <div class="card">
-            <h3 style="text-align:center; margin:0 0 15px 0;">🏆 ТОП-10 КЛАНА</h3>
-            <table class="rank-table" id="rtable">
-                </table>
-        </div>
-    </div>
-
-    <script>
-        let tg = window.Telegram.WebApp;
-        // ЗАМЕНИ НА СВОЙ IP (если тестируешь на ПК, это IP твоего компа)
-        const SERVER_URL = "http://192.168.0.8:5000/get_top"; 
-
-        function show(cId, tId) {
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(cId).classList.add('active');
-            document.getElementById(tId).classList.add('active');
-            if(cId === 'rank') fetchRating();
-        }
-
-        async function fetchRating() {
-            const table = document.getElementById('rtable');
-            table.innerHTML = "<tr><td colspan='2' style='text-align:center'>Загрузка...</td></tr>";
-            try {
-                const res = await fetch(SERVER_URL);
-                const data = await res.json();
-                table.innerHTML = "";
-                data.forEach((user, i) => {
-                    let icon = i==0?"🥇":i==1?"🥈":i==2?"🥉":"👤";
-                    table.innerHTML += `<tr class="rank-row">
-                        <td>${icon} <span class="nick">${user.nick}</span></td>
-                        <td class="rate">${user.rate}%</td>
-                    </tr>`;
-                });
-            } catch(e) { table.innerHTML = "Ошибка связи с сервером."; }
-        }
-
-        function sendData() {
-            let p = {
-                a: 's',
-                n: document.getElementById('nick').value,
-                r: parseFloat(document.getElementById('res').value),
-                f: parseFloat(document.getElementById('fc').value || 0),
-                s: parseFloat(document.getElementById('sc').value || 0)
-            };
-            let enc = btoa(encodeURIComponent(JSON.stringify(p)).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode('0x' + p1)));
-            tg.openTelegramLink("https://t.me/raven_resist_bot?start=" + enc);
-            tg.close();
-        }
-    </script>
-</body>
-</html>
+        <div id="t-form" class="tab active" onclick="switchTab('form')">АН
