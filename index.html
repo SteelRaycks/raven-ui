@@ -7,99 +7,83 @@
     <style>
         :root { --main-blue: #00A3FF; --dark-blue: #0A1929; --card-blue: #132F4C; }
         
+        /* Убираем скроллы в полях number */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
         body { 
             font-family: 'Segoe UI', Roboto, sans-serif; 
             background: radial-gradient(circle at center, #102A43 0%, var(--dark-blue) 100%);
-            color: #fff; margin: 0; padding: 20px; overflow: hidden;
+            color: #fff; margin: 0; padding: 20px; 
+            overflow: hidden; user-select: none; -webkit-user-select: none;
         }
 
-        .container {
-            animation: slideUp 0.6s ease-out;
-            max-width: 400px; margin: 0 auto;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .container { animation: slideUp 0.5s ease-out; max-width: 400px; margin: 0 auto; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .card {
-            background: rgba(19, 47, 76, 0.8);
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
-            padding: 30px;
-            border: 1px solid rgba(0, 163, 255, 0.3);
-            box-shadow: 0 0 30px rgba(0, 163, 255, 0.15);
+            background: rgba(19, 47, 76, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 28px; padding: 30px;
+            border: 1px solid rgba(0, 163, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 163, 255, 0.1);
         }
 
         h2 { 
             text-align: center; color: var(--main-blue); 
-            text-transform: uppercase; letter-spacing: 3px;
-            margin-bottom: 30px; font-size: 1.2rem;
-            text-shadow: 0 0 10px rgba(0, 163, 255, 0.5);
+            text-transform: uppercase; letter-spacing: 4px;
+            margin-bottom: 30px; font-size: 1rem;
+            text-shadow: 0 0 15px rgba(0, 163, 255, 0.4);
         }
 
-        .input-group { margin-bottom: 20px; position: relative; }
-        
-        label { 
-            display: block; font-size: 10px; color: var(--main-blue);
-            margin-bottom: 8px; font-weight: 800; letter-spacing: 1px;
-        }
+        .input-group { margin-bottom: 22px; }
+        label { display: block; font-size: 9px; color: var(--main-blue); margin-bottom: 8px; font-weight: 800; letter-spacing: 1.5px; opacity: 0.9; }
 
         input {
-            width: 100%; padding: 14px;
-            background: rgba(0, 30, 60, 0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; color: #fff; font-size: 16px;
-            box-sizing: border-box; transition: all 0.3s;
+            width: 100%; padding: 15px;
+            background: rgba(0, 30, 60, 0.7);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; color: #fff; font-size: 16px;
+            box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
         }
 
-        input:focus {
-            outline: none; border-color: var(--main-blue);
-            box-shadow: 0 0 15px rgba(0, 163, 255, 0.3);
-            background: rgba(0, 30, 60, 0.9);
-        }
+        input:focus { border-color: var(--main-blue); background: rgba(0, 30, 60, 0.95); box-shadow: 0 0 20px rgba(0, 163, 255, 0.2); }
 
         .btn {
-            width: 100%; padding: 18px; margin-top: 10px;
-            border: none; border-radius: 14px;
-            color: #fff; font-weight: 900; font-size: 14px;
+            width: 100%; padding: 18px; margin-top: 12px;
+            border: none; border-radius: 16px;
+            color: #fff; font-weight: 900; font-size: 13px;
             text-transform: uppercase; cursor: pointer;
             background: linear-gradient(135deg, #007AFF 0%, #00A3FF 100%);
-            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 25px rgba(0, 122, 255, 0.3);
+            transition: all 0.2s;
         }
 
-        .btn:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(0, 122, 255, 0.2); }
+        .btn:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-outline { background: transparent; border: 1px solid rgba(0, 163, 255, 0.4); margin-top: 15px; padding: 14px; font-size: 11px; box-shadow: none; }
 
-        .btn-outline {
-            background: transparent; border: 1px solid var(--main-blue);
-            margin-top: 15px; padding: 12px; opacity: 0.8;
-        }
-
-        .status-msg {
-            text-align: center; font-size: 10px; color: var(--main-blue);
-            margin-top: 20px; opacity: 0.5; font-family: monospace;
-        }
+        .status-line { text-align: center; font-size: 9px; color: var(--main-blue); margin-top: 25px; opacity: 0.4; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card">
-        <h2>AngryCrows Tactical</h2>
+        <h2>Tactical Intel</h2>
         
         <div class="input-group">
-            <label>OPERATIVE CALLSIGN</label>
-            <input type="text" id="nick" placeholder="NICKNAME">
+            <label>OPERATIVE ID</label>
+            <input type="text" id="nick" placeholder="NICKNAME" spellcheck="false">
         </div>
 
         <div class="input-group">
-            <label>BASE RESISTANCE</label>
+            <label>CORE RESISTANCE</label>
             <input type="number" id="res" placeholder="0">
         </div>
 
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 15px;">
             <div class="input-group" style="flex: 1;">
                 <label>FENCOR (%)</label>
                 <input type="number" id="fc" value="0" step="0.1">
@@ -110,43 +94,35 @@
             </div>
         </div>
 
-        <button class="btn" onclick="sendAction('s')">SYNC DATA</button>
-        <button class="btn btn-outline" onclick="sendAction('get_rating')">FULL RANKING</button>
+        <button class="btn" onclick="send('s')">PUSH TO SERVER</button>
+        <button class="btn btn-outline" onclick="send('get_rating')">VIEW ALL RANKINGS</button>
         
-        <div id="status" class="status-msg">SYSTEM READY // NO ERRORS</div>
+        <div class="status-line">CRYPTO-CHANNEL ACTIVE</div>
     </div>
 </div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-    tg.headerColor = '#0A1929';
+    tg.enableClosingConfirmation();
 
-    function encodeData(str) {
-        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p) => 
-            String.fromCharCode('0x' + p)));
+    function encode(str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode('0x' + p)));
     }
 
-    function sendAction(act) {
-        const stat = document.getElementById('status');
-        let payload = { a: act };
-
+    function send(act) {
+        let p = { a: act };
         if (act === 's') {
             let n = document.getElementById('nick').value.trim();
             let r = parseFloat(document.getElementById('res').value);
-            if (!n || isNaN(r)) { 
-                tg.showScanQrPopup({text: "ERROR: INVALID DATA"});
-                return; 
-            }
-            payload.n = n; payload.r = r;
-            payload.f = parseFloat(document.getElementById('fc').value || 0);
-            payload.s = parseFloat(document.getElementById('sc').value || 0);
+            if (!n || isNaN(r)) { tg.HapticFeedback.notificationOccurred('error'); return; }
+            p.n = n; p.r = r;
+            p.f = parseFloat(document.getElementById('fc').value || 0);
+            p.s = parseFloat(document.getElementById('sc').value || 0);
         }
-
-        stat.innerText = "TRANSMITTING...";
-        let encoded = encodeData(JSON.stringify(payload));
-        tg.openTelegramLink("https://t.me/raven_resist_bot?start=" + encoded);
-        setTimeout(() => { tg.close(); }, 450);
+        tg.HapticFeedback.impactOccurred('medium');
+        tg.openTelegramLink("https://t.me/raven_resist_bot?start=" + encode(JSON.stringify(p)));
+        tg.close();
     }
 </script>
 </body>
