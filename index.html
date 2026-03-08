@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #0A1929; color: #fff; margin: 0; padding: 20px; }
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #132F4C; }
-        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; color: #5AC8FA; opacity: 0.6; }
-        .tab.active { opacity: 1; border-bottom: 2px solid #007AFF; font-weight: bold; }
-        .card { background: #132F4C; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        body { font-family: sans-serif; background: #0A1929; color: #fff; padding: 20px; margin: 0; }
+        .tabs { display: flex; margin-bottom: 20px; background: #132F4C; border-radius: 10px; overflow: hidden; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; color: #5AC8FA; font-weight: bold; opacity: 0.5; }
+        .tab.active { opacity: 1; background: #1e4976; border-bottom: 3px solid #007AFF; }
+        .card { background: #132F4C; border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
         .content { display: none; }
         .content.active { display: block; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: #5AC8FA; margin-bottom: 5px; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; background: #001E3C; border: 1px solid #1e4976; border-radius: 8px; color: #fff; font-size: 16px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; background: #007AFF; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        .btn-alt { background: transparent; border: 1px solid #007AFF; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #001E3C; border: 1px solid #1e4976; border-radius: 8px; color: #fff; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; background: #007AFF; border: none; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; }
+        
+        /* Таблица рейтинга */
+        .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .rank-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .rank-row td { padding: 12px 5px; }
+        .nick { color: #E3F2FD; font-weight: bold; }
+        .rate { color: #5AC8FA; text-align: right; }
     </style>
 </head>
 <body>
@@ -28,72 +32,64 @@
 
     <div id="form" class="content active">
         <div class="card">
-            <h3 style="text-align:center; color:#5AC8FA; margin-top:0;">🦅 ANGRY CROWS INTEL</h3>
-            <div class="input-group">
-                <label>Позывной (Ник)</label>
-                <input type="text" id="nick" placeholder="Введите ник">
-            </div>
-            <div class="input-group">
-                <label>Стойкость</label>
-                <input type="number" id="res">
-            </div>
-            <div class="input-group">
-                <label>Фенкор (%)</label>
-                <input type="number" id="fc" value="0">
-            </div>
-            <div class="input-group">
-                <label>Скут-Тум (%)</label>
-                <input type="number" id="sc" value="0">
-            </div>
-            <button class="btn" onclick="send('s')">ОТПРАВИТЬ</button>
+            <h3 style="text-align:center; margin:0 0 15px 0;">🦅 ВВОД ДАННЫХ</h3>
+            <input type="text" id="nick" placeholder="Ваш ник">
+            <input type="number" id="res" placeholder="Стойкость">
+            <input type="number" id="fc" value="0" placeholder="Фенкор %">
+            <input type="number" id="sc" value="0" placeholder="Скут-Тум %">
+            <button class="btn" onclick="sendData()">ОТПРАВИТЬ</button>
         </div>
     </div>
 
     <div id="rank" class="content">
         <div class="card">
-            <h3 style="text-align:center; color:#5AC8FA; margin-top:0;">🏆 РЕЙТИНГ</h3>
-            <button class="btn btn-alt" onclick="send('get_rating')">ВЫВЕСТИ В ЧАТ</button>
+            <h3 style="text-align:center; margin:0 0 15px 0;">🏆 ТОП-10 КЛАНА</h3>
+            <table class="rank-table" id="rtable">
+                </table>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand();
+        // ЗАМЕНИ НА СВОЙ IP (если тестируешь на ПК, это IP твоего компа)
+        const SERVER_URL = "http://твой_ip:5000/get_top"; 
 
         function show(cId, tId) {
             document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(cId).classList.add('active');
             document.getElementById(tId).classList.add('active');
+            if(cId === 'rank') fetchRating();
         }
 
-        // Правильное кодирование кириллицы (UTF-8 -> Base64)
-        function b64EncodeUnicode(str) {
-            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-                return String.fromCharCode('0x' + p1);
-            }));
-        }
-
-        function send(action) {
-            let payload = { a: action };
-            if (action === 's') {
-                let n = document.getElementById('nick').value.trim();
-                let r = parseFloat(document.getElementById('res').value);
-                if (!n || isNaN(r)) { tg.showAlert("Заполните ник и стойкость!"); return; }
-                payload.n = n;
-                payload.r = r;
-                payload.f = parseFloat(document.getElementById('fc').value || 0);
-                payload.s = parseFloat(document.getElementById('sc').value || 0);
-            }
-
+        async function fetchRating() {
+            const table = document.getElementById('rtable');
+            table.innerHTML = "<tr><td colspan='2' style='text-align:center'>Загрузка...</td></tr>";
             try {
-                let encoded = b64EncodeUnicode(JSON.stringify(payload));
-                // Используем прямое открытие ссылки
-                tg.openTelegramLink("https://t.me/raven_resist_bot?start=" + encoded);
-                tg.close();
-            } catch (e) {
-                alert("Ошибка: " + e.message);
-            }
+                const res = await fetch(SERVER_URL);
+                const data = await res.json();
+                table.innerHTML = "";
+                data.forEach((user, i) => {
+                    let icon = i==0?"🥇":i==1?"🥈":i==2?"🥉":"👤";
+                    table.innerHTML += `<tr class="rank-row">
+                        <td>${icon} <span class="nick">${user.nick}</span></td>
+                        <td class="rate">${user.rate}%</td>
+                    </tr>`;
+                });
+            } catch(e) { table.innerHTML = "Ошибка связи с сервером."; }
+        }
+
+        function sendData() {
+            let p = {
+                a: 's',
+                n: document.getElementById('nick').value,
+                r: parseFloat(document.getElementById('res').value),
+                f: parseFloat(document.getElementById('fc').value || 0),
+                s: parseFloat(document.getElementById('sc').value || 0)
+            };
+            let enc = btoa(encodeURIComponent(JSON.stringify(p)).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode('0x' + p1)));
+            tg.openTelegramLink("https://t.me/raven_resist_bot?start=" + enc);
+            tg.close();
         }
     </script>
 </body>
