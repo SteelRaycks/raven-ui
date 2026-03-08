@@ -2,61 +2,78 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: #e0e0e0; padding: 20px; }
-        .card { background: #262626; border: 1px solid #3d3d3d; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { color: #f39c12; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        :root { --gold: #f39c12; --bg: #1a1a1a; --card: #262626; --text: #e0e0e0; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .card { background: var(--card); border: 1px solid #3d3d3d; border-radius: 12px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        h2 { color: var(--gold); text-align: center; margin-top: 0; text-transform: uppercase; font-size: 1.2em; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .info { font-size: 0.8em; color: #888; margin-bottom: 15px; line-height: 1.4; }
         .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; background: #121212; border: 1px solid #444; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        input:focus { border-color: #f39c12; outline: none; }
-        button { width: 100%; padding: 15px; background: linear-gradient(45deg, #d35400, #f39c12); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        button:active { transform: scale(0.98); }
+        label { display: block; font-size: 0.75em; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 12px; background: #121212; border: 1px solid #444; border-radius: 8px; color: #fff; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: var(--gold); outline: none; }
+        .btn { width: 100%; padding: 15px; background: linear-gradient(45deg, #d35400, #f39c12); border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 1em; cursor: pointer; margin-top: 10px; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>Raven Guard UI</h2>
+        <div class="info">
+            Автоматически учтено:<br>
+            • Фенкор: 36% (Клан + Личка + Могучка)<br>
+            • Скут-тум: 2% (Личный талант)
+        </div>
+        
         <div class="input-group">
             <label>НИК ПЕРСОНАЖА</label>
             <input type="text" id="nick" placeholder="Введите ник...">
         </div>
+        
         <div class="input-group">
-            <label>СТОЙКОСТЬ (БЕЗ КАСТОВ)</label>
+            <label>СТОЙКОСТЬ (ЧИСТАЯ)</label>
             <input type="number" id="res" placeholder="Например: 1250">
         </div>
+        
         <div class="input-group">
-            <label>ФЕНКОР (СИМВОЛЫ %)</label>
-            <input type="number" id="fc" value="0">
+            <label>СИМВОЛЫ ФЕНКОРА (%)</label>
+            <input type="number" id="fc" value="0" step="0.1">
         </div>
+        
         <div class="input-group">
-            <label>СКУТ-ТУМ (СИМВОЛЫ %)</label>
-            <input type="number" id="sc" value="0">
+            <label>СИМВОЛЫ СКУТ-ТУМ (%)</label>
+            <input type="number" id="sc" value="0" step="0.1">
         </div>
-        <button id="main_button">РАССЧИТАТЬ И СОХРАНИТЬ</button>
+        
+        <button class="btn" id="send_data">ОТПРАВИТЬ ОТЧЕТ</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand(); 
+        tg.MainButton.hide();
 
-        document.getElementById("main_button").onclick = function() {
-            let data = {
-                nick: document.getElementById("nick").value,
-                res: parseFloat(document.getElementById("res").value),
-                fc: parseFloat(document.getElementById("fc").value),
-                sc: parseFloat(document.getElementById("sc").value)
-            };
-            
-            if (!data.nick || isNaN(data.res)) {
-                alert("Заполните ник и стойкость!");
+        document.getElementById("send_data").onclick = function() {
+            let nick = document.getElementById("nick").value.trim();
+            let res = document.getElementById("res").value;
+            let fc = document.getElementById("fc").value || 0;
+            let sc = document.getElementById("sc").value || 0;
+
+            if (!nick || !res) {
+                tg.showAlert("Введите ник и стойкость!");
                 return;
             }
 
-            tg.sendData(JSON.stringify(data)); // Отправка данных боту
-            tg.close();
+            let resultData = {
+                nick: nick,
+                res: parseFloat(res),
+                fc: parseFloat(fc),
+                sc: parseFloat(sc)
+            };
+
+            tg.sendData(JSON.stringify(resultData)); 
         };
     </script>
 </body>
