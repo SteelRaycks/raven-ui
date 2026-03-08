@@ -6,13 +6,33 @@
     tg.headerColor = '#F5F7FA';
 
     function execAction(act) {
-        let nick = document.getElementById('nick').value.trim();
-        let res = document.getElementById('res').value;
+    let nick = document.getElementById('nick').value.trim();
+    let res = document.getElementById('res').value;
 
-        if (act === 'save' && (!nick || !res)) {
-            tg.showAlert("Заполните ник и стойкость!");
-            return;
-        }
+    if (!nick || !res) {
+        tg.showAlert("Заполните ник и стойкость!");
+        return;
+    }
+
+    let payload = {
+        nick: nick,
+        res: parseFloat(res),
+        fc: parseFloat(document.getElementById('fc').value || 0),
+        sc: parseFloat(document.getElementById('sc').value || 0)
+    };
+
+    // Кодируем данные для передачи через URL
+    let base64Data = btoa(JSON.stringify(payload));
+    
+    // Получаем имя твоего бота (подставь своё, если другое)
+    let botUsername = "твой_ник_бота"; // Например: RavenGuardBot
+
+    // Магия: мы открываем ссылку самого бота с параметром. 
+    // Это работает даже из кнопки "Open"!
+    tg.openTelegramLink("https://t.me/" + botUsername + "?start=" + base64Data);
+    
+    tg.close(); // Закрываем окно
+}
 
         let payload = {
             action: act,
