@@ -5,62 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --crow-orange: #FF8C00; --crow-dark: #121212; --crow-card: #1e1e1e; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--crow-dark); color: #e0e0e0; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .header h1 { font-size: 18px; color: var(--crow-orange); text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
-        .card { background: var(--crow-card); border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #2a2a2a; }
-        .input-group { margin-bottom: 18px; }
-        label { display: block; font-size: 11px; color: var(--crow-orange); font-weight: 800; margin-bottom: 6px; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; background: #0a0a0a; border: 1px solid #333; border-radius: 10px; color: #fff; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
-        input:focus { border-color: var(--crow-orange); outline: none; box-shadow: 0 0 8px rgba(255,140,0,0.2); }
-        .btn-send { width: 100%; padding: 18px; background: var(--crow-orange); color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 15px; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.2s; }
-        .btn-send:active { transform: scale(0.98); opacity: 0.8; }
-        .status { font-size: 10px; color: #555; text-align: center; margin-top: 15px; font-family: monospace; }
+        :root { --crow-orange: #FF8C00; --crow-bg: #0d0d0d; }
+        body { font-family: sans-serif; background: var(--crow-bg); color: white; padding: 20px; }
+        .card { background: #1a1a1a; padding: 25px; border-radius: 20px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: var(--crow-orange); font-size: 18px; text-align: center; text-transform: uppercase; margin-top: 0; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 10px; color: var(--crow-orange); margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 14px; background: #000; border: 1px solid #444; border-radius: 10px; color: white; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 18px; background: var(--crow-orange); border: none; border-radius: 12px; color: black; font-weight: 900; font-size: 15px; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>🦅 AngryCrows Intelligence</h1></div>
+    <h1>🦅 AngryCrows Intelligence</h1>
     <div class="card">
         <div class="input-group">
-            <label>Operative Callsign (Ник)</label>
-            <input type="text" id="nick" placeholder="Введите позывной...">
+            <label>CALLSIGN (НИК)</label>
+            <input type="text" id="nick" placeholder="Введите ник...">
         </div>
         <div class="input-group">
-            <label>Core Resistance (Стойкость)</label>
-            <input type="number" id="res" placeholder="Чистое значение">
+            <label>RESISTANCE (СТОЙКОСТЬ)</label>
+            <input type="number" id="res">
         </div>
         <div class="input-group">
-            <label>Fencor Bonus (%)</label>
+            <label>FENCOR SYMBOLS (%)</label>
             <input type="number" id="fc" value="0" step="0.1">
         </div>
         <div class="input-group">
-            <label>Skut-Tum Bonus (%)</label>
+            <label>SKUT-TUM (%)</label>
             <input type="number" id="sc" value="0" step="0.1">
         </div>
-        <button class="btn-send" onclick="transmitData()">Передать отчет</button>
-        <div id="status" class="status">SYSTEM READY</div>
+        <button class="btn" onclick="sendData()">Отправить в штаб</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#121212';
 
-        // Функция безопасного кодирования UTF-8 в Base64
-        function utf8_to_b64(str) {
-            return window.btoa(unescape(encodeURIComponent(str)));
+        // Функция кодирования, которая НЕ БОИТСЯ русских букв
+        function safeEncode(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
         }
 
-        function transmitData() {
+        function sendData() {
             const BOT_NAME = "raven_resist_bot";
-            const status = document.getElementById('status');
-            
             let nick = document.getElementById('nick').value.trim();
             let res = parseFloat(document.getElementById('res').value);
 
             if (!nick || isNaN(res)) {
-                tg.showAlert("⚠️ Внимание! Ник и Стойкость обязательны для расчета.");
+                tg.showAlert("Ошибка: Укажите ник и стойкость!");
                 return;
             }
 
@@ -73,20 +67,14 @@
             };
 
             try {
-                status.innerText = "ENCODING DATA...";
-                let encoded = utf8_to_b64(JSON.stringify(payload));
-                
-                // Передача через Deep Link
+                let encoded = safeEncode(JSON.stringify(payload));
                 let link = `https://t.me/${BOT_NAME}?start=${encoded}`;
                 
-                status.innerText = "TRANSMITTING...";
+                // Сначала открываем ссылку, потом закрываем приложение
                 tg.openTelegramLink(link);
-                
-                // Закрываем приложение через небольшую паузу
-                setTimeout(() => { tg.close(); }, 400);
+                setTimeout(() => { tg.close(); }, 350);
             } catch (e) {
-                status.innerText = "ERROR: " + e.message;
-                tg.showAlert("Ошибка кодирования: " + e.message);
+                tg.showAlert("JS ERROR: " + e.message);
             }
         }
     </script>
