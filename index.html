@@ -63,7 +63,7 @@
         }
 
         function sendData() {
-            const BOT_NAME = "ВАШ_ЮЗЕРНЕЙМ_БОТА"; // Заменить на своего бота!
+            const BOT_NAME = "@raven_resist_bot"; // Заменить на своего бота!
             let nick = document.getElementById('nick').value.trim();
             let res = parseFloat(document.getElementById('res').value);
             
@@ -84,7 +84,7 @@
         }
 
         function requestAction(act) {
-            const BOT_NAME = "ВАШ_ЮЗЕРНЕЙМ_БОТА";
+            const BOT_NAME = "@raven_resist_bot";
             let data = { a: act };
             if (act === 'delete') {
                 let d_nick = document.getElementById('del_nick').value.trim();
