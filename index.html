@@ -6,79 +6,72 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --blue-main: #007AFF; --blue-dark: #0A1929; --blue-card: #132F4C; --text: #E3F2FD; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--blue-dark); color: var(--text); margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: -apple-system, sans-serif; background: var(--blue-dark); color: var(--text); margin: 0; padding: 0; }
         
-        .tabs { display: flex; background: rgba(19, 47, 76, 0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tab { flex: 1; padding: 16px; text-align: center; font-size: 13px; font-weight: 700; color: #5AC8FA; opacity: 0.5; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .tabs { display: flex; background: #132F4C; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { flex: 1; padding: 15px; text-align: center; font-size: 12px; font-weight: bold; color: #5AC8FA; opacity: 0.5; cursor: pointer; }
         .tab.active { opacity: 1; border-bottom: 3px solid var(--blue-main); color: #fff; }
 
-        .container { padding: 20px; display: none; animation: fadeIn 0.3s ease; }
+        .container { padding: 20px; display: none; }
         .container.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: var(--blue-card); border-radius: 20px; padding: 25px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
-        h2 { color: #5AC8FA; text-align: center; margin: 0 0 20px 0; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; }
+        .card { background: var(--blue-card); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        h2 { color: #5AC8FA; text-align: center; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; }
         
-        .input-group { margin-bottom: 18px; }
-        label { display: block; font-size: 10px; font-weight: 800; color: #5AC8FA; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
-        input { width: 100%; padding: 14px; background: #001E3C; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--blue-main); box-shadow: 0 0 10px rgba(0,122,255,0.2); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 10px; color: #5AC8FA; margin-bottom: 5px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; background: #001E3C; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: white; font-size: 16px; box-sizing: border-box; outline: none; }
         
-        .btn { width: 100%; padding: 18px; border: none; border-radius: 14px; color: white; font-weight: 800; font-size: 14px; cursor: pointer; background: linear-gradient(135deg, #007AFF, #0059B2); text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .btn:active { transform: scale(0.98); }
-        .btn-alt { background: #173A5E; border: 1px solid var(--blue-main); margin-top: 10px; }
-        
-        #status-bar { text-align: center; font-size: 10px; margin-top: 15px; color: #5AC8FA; opacity: 0.6; font-family: monospace; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; background: #007AFF; text-transform: uppercase; }
+        .btn-alt { background: transparent; border: 1px solid #007AFF; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="tabs">
-        <div id="t-form" class="tab active" onclick="switchTab('form')">Анфета</div>
-        <div id="t-rank" class="tab" onclick="switchTab('rank')">Рейтинг</div>
+        <div id="t-form" class="tab active" onclick="switchTab('form')">АНКЕТА</div>
+        <div id="t-rank" class="tab" onclick="switchTab('rank')">РЕЙТИНГ</div>
     </div>
 
     <div id="form" class="container active">
         <div class="card">
-            <h2>🦅 AngryCrows Intelligence</h2>
+            <h2>🦅 AngryCrows Intel</h2>
             <div class="input-group">
                 <label>Callsign (Ник)</label>
-                <input type="text" id="nick" placeholder="Введите позывной...">
+                <input type="text" id="nick" placeholder="Ник...">
             </div>
             <div class="input-group">
-                <label>Base Resistance (Стойкость)</label>
+                <label>Base Resistance</label>
                 <input type="number" id="res">
             </div>
             <div class="input-group">
-                <label>Fencor Symbols (%)</label>
-                <input type="number" id="fc" value="0" step="0.1">
+                <label>Fencor (%)</label>
+                <input type="number" id="fc" value="0">
             </div>
             <div class="input-group">
                 <label>Skut-Tum (%)</label>
-                <input type="number" id="sc" value="0" step="0.1">
+                <input type="number" id="sc" value="0">
             </div>
-            <button class="btn" onclick="executeAction('s')">Передать данные</button>
-            <div id="status-bar">READY FOR UPLOAD</div>
+            <button class="btn" onclick="executeAction('s')">ПЕРЕДАТЬ ДАННЫЕ</button>
         </div>
     </div>
 
     <div id="rank" class="container">
         <div class="card">
-            <h2>🏆 Global Ranking</h2>
-            <button class="btn btn-alt" onclick="executeAction('get_rating')">Показать ТОП-10</button>
-            <p style="font-size: 11px; color: #8e8e93; text-align: center; margin-top: 20px;">Нажмите кнопку выше, и бот вышлет актуальный список в чат.</p>
+            <h2>🏆 GLOBAL RANKING</h2>
+            <button class="btn btn-alt" onclick="executeAction('get_rating')">ВЫВЕСТИ ТОП В ЧАТ</button>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#0A1929';
 
-        function switchTab(t) {
+        function switchTab(tabId) {
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            document.getElementById('t-' + t).classList.add('active');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('t-' + tabId).classList.add('active');
         }
 
         function safeEncode(str) {
@@ -86,27 +79,27 @@
                 String.fromCharCode('0x' + p1)));
         }
 
-        function executeAction(action) {
+        function executeAction(act) {
             const BOT_NAME = "raven_resist_bot";
-            const status = document.getElementById('status-bar');
-            let payload = { a: action };
+            let payload = { a: act };
 
-            if (action === 's') {
+            if (act === 's') {
                 let n = document.getElementById('nick').value.trim();
                 let r = parseFloat(document.getElementById('res').value);
                 if (!n || isNaN(r)) { tg.showAlert("Заполните ник и стойкость!"); return; }
-                payload.n = n; payload.r = r;
+                
+                payload.n = n; 
+                payload.r = r;
                 payload.f = parseFloat(document.getElementById('fc').value || 0);
                 payload.s = parseFloat(document.getElementById('sc').value || 0);
             }
 
             try {
-                status.innerText = "ENCODING AND TRANSMITTING...";
                 let encoded = safeEncode(JSON.stringify(payload));
-                tg.openTelegramLink(`https://t.me/${BOT_NAME}?start=${encoded}`);
+                tg.openTelegramLink("https://t.me/" + BOT_NAME + "?start=" + encoded);
                 setTimeout(() => { tg.close(); }, 400);
             } catch (e) {
-                tg.showAlert("Ошибка: " + e.message);
+                alert("Ошибка: " + e.message);
             }
         }
     </script>
