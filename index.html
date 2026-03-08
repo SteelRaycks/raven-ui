@@ -4,123 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        :root { --gold: #f39c12; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #d35400; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        :root { 
+            --primary: #007aff; 
+            --secondary: #e3f2fd; 
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass: rgba(255, 255, 255, 0.8);
+            --text: #1a2a3a;
+        }
         
-        /* Навигация */
-        .tabs { display: flex; background: #000; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid var(--gold); }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: #888; transition: 0.3s; }
-        .tab.active { color: var(--gold); background: var(--card); }
+        body { 
+            font-family: 'SF Pro Display', -apple-system, sans-serif; 
+            background: var(--bg-gradient); 
+            background-attachment: fixed;
+            color: var(--text); 
+            margin: 0; padding: 0; min-height: 100vh;
+        }
 
-        .container { padding: 20px; display: none; animation: fadeIn 0.3s; }
+        /* Навигация с эффектом размытия */
+        .tabs { 
+            display: flex; 
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid rgba(0, 122, 255, 0.2);
+        }
+        .tab { 
+            flex: 1; padding: 18px; text-align: center; 
+            cursor: pointer; font-weight: 600; color: #707b7c; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.5px;
+        }
+        .tab.active { 
+            color: var(--primary); 
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: inset 0 -3px 0 var(--primary);
+        }
+
+        .container { padding: 20px; display: none; }
         .container.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid #333; margin-bottom: 15px; }
-        h2 { color: var(--gold); margin: 0 0 15px 0; text-transform: uppercase; font-size: 1.1em; text-align: center; }
+        /* Стеклянные карточки */
+        .glass-card { 
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 20px; 
+            padding: 25px; 
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            margin-bottom: 20px;
+        }
 
-        .input-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.7em; color: var(--gold); margin-bottom: 4px; font-weight: bold; }
-        input { width: 100%; padding: 12px; background: #000; border: 1px solid #444; border-radius: 8px; color: #fff; box-sizing: border-box; font-size: 16px; }
+        h2 { 
+            color: var(--primary); 
+            margin: 0 0 20px 0; 
+            font-size: 1.3em; text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .input-group { margin-bottom: 18px; position: relative; }
+        label { 
+            display: block; font-size: 0.8em; color: #5dade2; 
+            margin-bottom: 6px; font-weight: 700; margin-left: 5px;
+        }
+        input { 
+            width: 100%; padding: 14px; 
+            background: rgba(255, 255, 255, 0.9); 
+            border: 1px solid rgba(0, 122, 255, 0.2); 
+            border-radius: 12px; color: var(--text); 
+            box-sizing: border-box; font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        input:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 10px rgba(0, 122, 255, 0.1);
+            outline: none; 
+        }
         
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-calc { background: linear-gradient(45deg, var(--accent), var(--gold)); margin-top: 10px; }
-        
-        /* Список рейтинга */
-        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #333; }
-        .player-info { flex-grow: 1; }
-        .player-name { font-weight: bold; color: var(--gold); }
-        .player-rate { font-size: 0.9em; color: #fff; }
-        .actions { display: flex; gap: 10px; }
-        .btn-small { padding: 8px; border-radius: 5px; font-size: 0.8em; border: none; color: #fff; cursor: pointer; }
-        .btn-edit { background: #2980b9; }
-        .btn-del { background: #c0392b; }
+        /* Кнопка с эффектом пульсации */
+        .btn-main { 
+            width: 100%; padding: 16px; 
+            background: linear-gradient(45deg, #007aff, #00c6ff); 
+            border: none; border-radius: 14px; 
+            color: white; font-weight: bold; font-size: 1em;
+            cursor: pointer; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        }
+        .btn-main:active { transform: scale(0.96); }
+
+        /* Стильный рейтинг */
+        .player-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.3);
+        }
+        .rank-badge {
+            background: var(--primary); color: white;
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8em; font-weight: bold; margin-right: 12px;
+        }
     </style>
 </head>
 <body>
     <div class="tabs">
-        <div class="tab active" onclick="openTab('calc')">КАЛЬКУЛЯТОР</div>
+        <div class="tab active" onclick="openTab('calc')">АНКЕТА</div>
         <div class="tab" onclick="openTab('rating')">РЕЙТИНГ</div>
     </div>
 
-    <div id="calc" class="container active">
-        <div class="card">
-            <h2>Расчет параметров</h2>
+    <div id="calc" class="container active animate__animated animate__fadeIn">
+        <div class="glass-card">
+            <h2>🛡 Raven Guard Stats</h2>
             <div class="input-group">
-                <label>НИК ПЕРСОНАЖА</label>
-                <input type="text" id="nick" placeholder="Raycks...">
+                <label>ИМЯ ПЕРСОНАЖА</label>
+                <input type="text" id="nick" placeholder="Введите ник...">
             </div>
             <div class="input-group">
-                <label>СТОЙКОСТЬ (ЧИСТАЯ)</label>
-                <input type="number" id="res" placeholder="1250">
+                <label>СТОЙКОСТЬ</label>
+                <input type="number" id="res" placeholder="Чистое значение">
             </div>
             <div class="input-group">
                 <label>СИМВОЛЫ ФЕНКОРА (%)</label>
-                <input type="number" id="fc" value="0" step="0.1">
+                <input type="number" id="fc" value="0">
             </div>
             <div class="input-group">
                 <label>СИМВОЛЫ СКУТ-ТУМ (%)</label>
-                <input type="number" id="sc" value="0" step="0.1">
+                <input type="number" id="sc" value="0">
             </div>
-            <button class="btn btn-calc" onclick="sendData('save')">СОХРАНИТЬ В РЕЙТИНГ</button>
+            <button class="btn-main" onclick="saveData()">ОТПРАВИТЬ ОТЧЕТ</button>
         </div>
     </div>
 
-    <div id="rating" class="container">
-        <div class="card">
-            <h2>ТОП Raven Guard</h2>
-            <div id="rating-list">Загрузка данных...</div>
+    <div id="rating" class="container animate__animated animate__fadeIn">
+        <div class="glass-card">
+            <h2>🏆 Топ Участников</h2>
+            <div id="rating-content">Для обновления рейтинга нажмите кнопку "Обновить" в меню бота</div>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        tg.headerColor = '#f5f7fa';
 
         function openTab(tabId) {
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
-            if(tabId === 'rating') loadRating();
+            
+            if(tabId === 'rating') {
+                tg.sendData(JSON.stringify({action: 'get_rating'}));
+            }
         }
 
-        // Отправка данных боту через sendData (для простоты)
-        function sendData(action, extraData = null) {
+        function saveData() {
             let nick = document.getElementById("nick").value.trim();
             let res = document.getElementById("res").value;
 
-            if (action === 'save' && (!nick || !res)) {
-                tg.showAlert("Заполните ник и стойкость!");
+            if (!nick || !res) {
+                tg.showScanQrPopup({text: "Заполните все поля!"}); // Просто пример системного окна
                 return;
             }
 
-            let payload = {
-                action: action,
+            let data = {
+                action: 'save',
                 nick: nick,
                 res: parseFloat(res),
                 fc: parseFloat(document.getElementById("fc").value || 0),
-                sc: parseFloat(document.getElementById("sc").value || 0),
-                ...extraData
+                sc: parseFloat(document.getElementById("sc").value || 0)
             };
 
-            tg.sendData(JSON.stringify(payload));
-        }
-
-        // В этой версии мы всё еще используем sendData для записи, 
-        // но добавим "заглушку" для рейтинга, которую будет обновлять бот
-        function loadRating() {
-            // В чистом Web App без внешнего сервера базы данных мы просим бота прислать нам рейтинг сообщением
-            tg.sendData(JSON.stringify({action: 'get_rating'}));
-            tg.close();
-        }
-
-        // Функция для удаления (вызывается из списка)
-        function deletePlayer(name) {
-            if(confirm(`Удалить ${name}?`)) {
-                tg.sendData(JSON.stringify({action: 'delete', nick: name}));
-            }
+            tg.sendData(JSON.stringify(data));
         }
     </script>
 </body>
