@@ -4,85 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        :root { --blue: #007AFF; --glass: rgba(255, 255, 255, 0.9); }
-        body { font-family: -apple-system, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); margin: 0; padding: 0; min-height: 100vh; }
-        .tabs { display: flex; background: var(--glass); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(0,122,255,0.1); }
-        .tab { flex: 1; padding: 15px; text-align: center; font-weight: 600; color: #8e8e93; cursor: pointer; }
-        .tab.active { color: var(--blue); box-shadow: inset 0 -3px 0 var(--blue); }
-        .container { padding: 20px; display: none; }
-        .container.active { display: block; }
-        .glass-card { background: var(--glass); border-radius: 20px; padding: 25px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid white; }
-        h2 { color: var(--blue); text-align: center; margin-top: 0; }
+        :root { --accent: #FF4500; --dark: #1a1a1a; }
+        body { font-family: sans-serif; background: var(--dark); color: white; padding: 20px; }
+        .card { background: #2a2a2a; padding: 20px; border-radius: 15px; border: 1px solid var(--accent); }
+        h2 { color: var(--accent); text-align: center; margin-bottom: 20px; text-transform: uppercase; }
         .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--blue); margin-bottom: 5px; }
-        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; }
-        .btn-main { width: 100%; padding: 16px; border: none; border-radius: 15px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; background: linear-gradient(45deg, #007AFF, #00C6FF); }
+        label { display: block; font-size: 10px; margin-bottom: 5px; color: #888; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; background: var(--accent); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        #debug-log { margin-top: 20px; font-size: 10px; color: #555; word-break: break-all; }
     </style>
 </head>
 <body>
-    <div class="tabs">
-        <div id="t-calc" class="tab active" onclick="switchTab('calc')">АНКЕТА</div>
-        <div id="t-rank" class="tab" onclick="switchTab('rank')">УПРАВЛЕНИЕ</div>
-    </div>
-
-    <div id="calc" class="container active animate__animated animate__fadeIn">
-        <div class="glass-card">
-            <h2>🛡 Raven Guard</h2>
-            <div class="input-group"><label>НИК ПЕРСОНАЖА</label><input type="text" id="nick" placeholder="Raycks"></div>
-            <div class="input-group"><label>СТОЙКОСТЬ</label><input type="number" id="res"></div>
-            <div class="input-group"><label>ФЕНКОР (%)</label><input type="number" id="fc" value="0"></div>
-            <div class="input-group"><label>СКУТ-ТУМ (%)</label><input type="number" id="sc" value="0"></div>
-            <button class="btn-main" onclick="sendToBot('s')">ОТПРАВИТЬ ОТЧЕТ</button>
+    <h2>🦅 AngryCrows Tactical</h2>
+    <div class="card">
+        <div class="input-group">
+            <label>CALLSIGN (НИК)</label>
+            <input type="text" id="nick" placeholder="Reyks">
         </div>
-    </div>
-
-    <div id="rank" class="container animate__animated animate__fadeIn">
-        <div class="glass-card">
-            <h2>🏆 Рейтинг</h2>
-            <button class="btn-main" style="margin-bottom: 15px;" onclick="sendToBot('get_rating')">ПОКАЗАТЬ ТОП</button>
-            <div class="input-group"><label>НИК ДЛЯ УДАЛЕНИЯ</label><input type="text" id="del_nick"></div>
-            <button class="btn-main" style="background: #FF3B30;" onclick="sendToBot('delete')">УДАЛИТЬ ИГРОКА</button>
+        <div class="input-group">
+            <label>RESISTANCE (СТОЙКОСТЬ)</label>
+            <input type="number" id="res">
         </div>
+        <div class="input-group">
+            <label>FENCOR SYMBOLS (%)</label>
+            <input type="number" id="fc" value="0">
+        </div>
+        <div class="input-group">
+            <label>SKUT-TUM (%)</label>
+            <input type="number" id="sc" value="0">
+        </div>
+        <button class="btn" onclick="sendData()">ОТПРАВИТЬ ДАННЫЕ</button>
     </div>
+    <div id="debug-log"></div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        function switchTab(t) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            document.getElementById('t-' + t).classList.add('active');
+        function log(msg) {
+            document.getElementById('debug-log').innerText += "\n> " + msg;
         }
 
-        function sendToBot(action) {
-            // Имя твоего бота
-            const BOT_NAME = "raven_resist_bot"; 
-            
-            let data = { a: action };
+        function sendData() {
+            const BOT_NAME = "raven_resist_bot";
+            log("Начинаю сбор данных...");
 
-            if (action === 's') {
-                data.n = document.getElementById('nick').value.trim();
-                data.r = parseFloat(document.getElementById('res').value);
-                data.f = parseFloat(document.getElementById('fc').value || 0);
-                data.s = parseFloat(document.getElementById('sc').value || 0);
-                if (!data.n || isNaN(data.r)) { tg.showAlert("Заполните ник и стойкость!"); return; }
-            } else if (action === 'delete') {
-                data.n = document.getElementById('del_nick').value.trim();
-                if (!data.n) { tg.showAlert("Введите ник!"); return; }
+            let nick = document.getElementById('nick').value.trim();
+            let res = parseFloat(document.getElementById('res').value);
+
+            if (!nick || isNaN(res)) {
+                tg.showAlert("ОШИБКА: Заполните ник и стойкость!");
+                return;
             }
 
-            // Кодируем данные в Base64
-            let encoded = btoa(JSON.stringify(data));
-            
-            // Формируем ссылку и открываем её
-            tg.openTelegramLink(`https://t.me/${BOT_NAME}?start=${encoded}`);
-            
-            // Закрываем приложение
-            setTimeout(() => { tg.close(); }, 100);
+            let payload = {
+                a: "s",
+                n: nick,
+                r: res,
+                f: parseFloat(document.getElementById('fc').value || 0),
+                s: parseFloat(document.getElementById('sc').value || 0)
+            };
+
+            try {
+                let encoded = btoa(JSON.stringify(payload));
+                let finalLink = `https://t.me/${BOT_NAME}?start=${encoded}`;
+                
+                log("Ссылка сформирована. Пытаюсь открыть...");
+                
+                // Включаем отладку: показываем ссылку перед переходом
+                tg.showConfirm("Перейти по ссылке отладки? \n" + finalLink, (ok) => {
+                    if (ok) {
+                        tg.openTelegramLink(finalLink);
+                        setTimeout(() => { tg.close(); }, 500);
+                    }
+                });
+
+            } catch (e) {
+                log("КРИТИЧЕСКАЯ ОШИБКА: " + e.message);
+                tg.showAlert("Ошибка JS: " + e.message);
+            }
         }
     </script>
 </body>
