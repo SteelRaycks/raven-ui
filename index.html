@@ -6,178 +6,168 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        :root { 
-            --primary: #007aff; 
-            --secondary: #e3f2fd; 
-            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            --glass: rgba(255, 255, 255, 0.8);
-            --text: #1a2a3a;
+        :root {
+            --accent-blue: #007AFF;
+            --soft-blue: #E3F2FD;
+            --white: #FFFFFF;
+            --text-dark: #1C1C1E;
+            --glass: rgba(255, 255, 255, 0.7);
         }
-        
-        body { 
-            font-family: 'SF Pro Display', -apple-system, sans-serif; 
-            background: var(--bg-gradient); 
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #F5F7FA 0%, #B8C6DB 100%);
             background-attachment: fixed;
-            color: var(--text); 
-            margin: 0; padding: 0; min-height: 100vh;
+            color: var(--text-dark);
+            margin: 0; padding: 0;
+            overflow-x: hidden;
         }
 
-        /* Навигация с эффектом размытия */
-        .tabs { 
-            display: flex; 
-            background: rgba(255, 255, 255, 0.6); 
-            backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 100;
-            border-bottom: 1px solid rgba(0, 122, 255, 0.2);
-        }
-        .tab { 
-            flex: 1; padding: 18px; text-align: center; 
-            cursor: pointer; font-weight: 600; color: #707b7c; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: 0.5px;
-        }
-        .tab.active { 
-            color: var(--primary); 
-            background: rgba(255, 255, 255, 0.4);
-            box-shadow: inset 0 -3px 0 var(--primary);
-        }
-
-        .container { padding: 20px; display: none; }
-        .container.active { display: block; }
-
-        /* Стеклянные карточки */
-        .glass-card { 
+        .header-tabs {
+            display: flex;
             background: var(--glass);
             backdrop-filter: blur(15px);
-            border-radius: 20px; 
-            padding: 25px; 
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid rgba(0, 122, 255, 0.1);
+        }
+
+        .tab-btn {
+            flex: 1; padding: 15px; text-align: center;
+            font-weight: 600; color: #8E8E93;
+            transition: all 0.3s ease; border: none; background: none;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+            box-shadow: inset 0 -3px 0 var(--accent-blue);
+        }
+
+        .content-section { padding: 20px; display: none; }
+        .content-section.active { display: block; }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
             border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.1);
             margin-bottom: 20px;
         }
 
-        h2 { 
-            color: var(--primary); 
-            margin: 0 0 20px 0; 
-            font-size: 1.3em; text-align: center;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+        h2 { color: var(--accent-blue); margin: 0 0 20px 0; text-align: center; font-size: 1.4rem; }
 
-        .input-group { margin-bottom: 18px; position: relative; }
-        label { 
-            display: block; font-size: 0.8em; color: #5dade2; 
-            margin-bottom: 6px; font-weight: 700; margin-left: 5px;
+        .input-box { margin-bottom: 16px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 6px; padding-left: 4px; }
+        input {
+            width: 100%; padding: 14px;
+            background: var(--white);
+            border: 1px solid rgba(0, 122, 255, 0.2);
+            border-radius: 14px; color: var(--text-dark);
+            box-sizing: border-box; font-size: 1rem;
+            transition: 0.3s;
         }
-        input { 
-            width: 100%; padding: 14px; 
-            background: rgba(255, 255, 255, 0.9); 
-            border: 1px solid rgba(0, 122, 255, 0.2); 
-            border-radius: 12px; color: var(--text); 
-            box-sizing: border-box; font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        input:focus { 
-            border-color: var(--primary); 
-            box-shadow: 0 0 10px rgba(0, 122, 255, 0.1);
-            outline: none; 
-        }
-        
-        /* Кнопка с эффектом пульсации */
-        .btn-main { 
-            width: 100%; padding: 16px; 
-            background: linear-gradient(45deg, #007aff, #00c6ff); 
-            border: none; border-radius: 14px; 
-            color: white; font-weight: bold; font-size: 1em;
+        input:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1); }
+
+        .action-btn {
+            width: 100%; padding: 16px;
+            background: linear-gradient(45deg, #007AFF, #00C6FF);
+            border: none; border-radius: 16px;
+            color: white; font-weight: 700; font-size: 1rem;
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.3);
             cursor: pointer; transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
         }
-        .btn-main:active { transform: scale(0.96); }
+        .action-btn:active { transform: scale(0.97); }
 
-        /* Стильный рейтинг */
-        .player-row {
+        /* Стиль для рейтинга */
+        .rating-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 12px; border: 1px solid rgba(255,255,255,0.3);
+            padding: 14px; background: rgba(255,255,255,0.5);
+            border-radius: 16px; margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        .rank-badge {
-            background: var(--primary); color: white;
-            width: 28px; height: 28px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8em; font-weight: bold; margin-right: 12px;
-        }
+        .nick-tag { font-weight: 700; color: var(--text-dark); }
+        .score-tag { color: var(--accent-blue); font-weight: 800; }
+        .del-btn { background: #FF3B30; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 0.7rem; }
     </style>
 </head>
 <body>
-    <div class="tabs">
-        <div class="tab active" onclick="openTab('calc')">АНКЕТА</div>
-        <div class="tab" onclick="openTab('rating')">РЕЙТИНГ</div>
+    <div class="header-tabs">
+        <button class="tab-btn active" onclick="switchTab('form')">АНКЕТА</button>
+        <button class="tab-btn" onclick="switchTab('top')">РЕЙТИНГ</button>
     </div>
 
-    <div id="calc" class="container active animate__animated animate__fadeIn">
+    <div id="form-sec" class="content-section active animate__animated animate__fadeIn">
         <div class="glass-card">
-            <h2>🛡 Raven Guard Stats</h2>
-            <div class="input-group">
-                <label>ИМЯ ПЕРСОНАЖА</label>
+            <h2>🛡 Raven Guard</h2>
+            <div class="input-box">
+                <label>НИК ПЕРСОНАЖА</label>
                 <input type="text" id="nick" placeholder="Введите ник...">
             </div>
-            <div class="input-group">
+            <div class="input-box">
                 <label>СТОЙКОСТЬ</label>
-                <input type="number" id="res" placeholder="Чистое значение">
+                <input type="number" id="res" placeholder="Базовое значение">
             </div>
-            <div class="input-group">
+            <div class="input-box">
                 <label>СИМВОЛЫ ФЕНКОРА (%)</label>
-                <input type="number" id="fc" value="0">
+                <input type="number" id="fc" value="0" step="0.1">
             </div>
-            <div class="input-group">
+            <div class="input-box">
                 <label>СИМВОЛЫ СКУТ-ТУМ (%)</label>
-                <input type="number" id="sc" value="0">
+                <input type="number" id="sc" value="0" step="0.1">
             </div>
-            <button class="btn-main" onclick="saveData()">ОТПРАВИТЬ ОТЧЕТ</button>
+            <button class="action-btn" onclick="execAction('save')">ОТПРАВИТЬ ДАННЫЕ</button>
         </div>
     </div>
 
-    <div id="rating" class="container animate__animated animate__fadeIn">
+    <div id="top-sec" class="content-section animate__animated animate__fadeIn">
         <div class="glass-card">
-            <h2>🏆 Топ Участников</h2>
-            <div id="rating-content">Для обновления рейтинга нажмите кнопку "Обновить" в меню бота</div>
+            <h2>🏆 Топ Листа</h2>
+            <p style="font-size: 0.8rem; text-align: center; color: #8E8E93;">Для обновления или удаления игрока выберите действие ниже</p>
+            <div class="input-box">
+                <input type="text" id="target-nick" placeholder="Ник для удаления...">
+            </div>
+            <button class="action-btn" style="background: #FF3B30;" onclick="execAction('delete')">УДАЛИТЬ ИЗ БАЗЫ</button>
+            <hr style="opacity: 0.1; margin: 20px 0;">
+            <button class="action-btn" style="background: var(--accent-blue);" onclick="execAction('get_rating')">ПОКАЗАТЬ В ЧАТЕ</button>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#f5f7fa';
+        tg.headerColor = '#F5F7FA';
 
-        function openTab(tabId) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+        function switchTab(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             
-            if(tabId === 'rating') {
-                tg.sendData(JSON.stringify({action: 'get_rating'}));
-            }
+            document.getElementById(id + '-sec').classList.add('active');
+            event.target.classList.add('active');
         }
 
-        function saveData() {
-            let nick = document.getElementById("nick").value.trim();
-            let res = document.getElementById("res").value;
+        function execAction(act) {
+            let payload = { action: act };
 
-            if (!nick || !res) {
-                tg.showScanQrPopup({text: "Заполните все поля!"}); // Просто пример системного окна
-                return;
+            if (act === 'save') {
+                payload.nick = document.getElementById('nick').value.trim();
+                payload.res = parseFloat(document.getElementById('res').value);
+                payload.fc = parseFloat(document.getElementById('fc').value || 0);
+                payload.sc = parseFloat(document.getElementById('sc').value || 0);
+                
+                if (!payload.nick || isNaN(payload.res)) {
+                    tg.showAlert("Заполните ник и стойкость!");
+                    return;
+                }
+            } else if (act === 'delete') {
+                payload.nick = document.getElementById('target-nick').value.trim();
+                if (!payload.nick) {
+                    tg.showAlert("Введите ник для удаления!");
+                    return;
+                }
             }
 
-            let data = {
-                action: 'save',
-                nick: nick,
-                res: parseFloat(res),
-                fc: parseFloat(document.getElementById("fc").value || 0),
-                sc: parseFloat(document.getElementById("sc").value || 0)
-            };
-
-            tg.sendData(JSON.stringify(data));
+            tg.sendData(JSON.stringify(payload));
         }
     </script>
 </body>
