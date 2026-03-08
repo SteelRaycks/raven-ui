@@ -1,64 +1,58 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --blue-main: #007AFF; --blue-dark: #0A1929; --blue-card: #132F4C; --text: #E3F2FD; }
-        body { font-family: -apple-system, sans-serif; background: var(--blue-dark); color: var(--text); margin: 0; padding: 0; }
-        
-        .tabs { display: flex; background: #132F4C; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tab { flex: 1; padding: 15px; text-align: center; font-size: 12px; font-weight: bold; color: #5AC8FA; opacity: 0.5; cursor: pointer; }
-        .tab.active { opacity: 1; border-bottom: 3px solid var(--blue-main); color: #fff; }
-
-        .container { padding: 20px; display: none; }
-        .container.active { display: block; }
-
-        .card { background: var(--blue-card); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        h2 { color: #5AC8FA; text-align: center; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; }
-        
+        body { font-family: sans-serif; background-color: #0A1929; color: #fff; margin: 0; padding: 20px; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #132F4C; }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; color: #5AC8FA; opacity: 0.6; }
+        .tab.active { opacity: 1; border-bottom: 2px solid #007AFF; font-weight: bold; }
+        .card { background: #132F4C; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .content { display: none; }
+        .content.active { display: block; }
         .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 10px; color: #5AC8FA; margin-bottom: 5px; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; background: #001E3C; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: white; font-size: 16px; box-sizing: border-box; outline: none; }
-        
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; background: #007AFF; text-transform: uppercase; }
-        .btn-alt { background: transparent; border: 1px solid #007AFF; margin-top: 10px; }
+        label { display: block; font-size: 12px; color: #5AC8FA; margin-bottom: 5px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; background: #001E3C; border: 1px solid #1e4976; border-radius: 8px; color: #fff; font-size: 16px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; background: #007AFF; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-alt { background: transparent; border: 1px solid #007AFF; }
     </style>
 </head>
 <body>
+
     <div class="tabs">
-        <div id="t-form" class="tab active" onclick="switchTab('form')">АНКЕТА</div>
-        <div id="t-rank" class="tab" onclick="switchTab('rank')">РЕЙТИНГ</div>
+        <div id="t1" class="tab active" onclick="show('form', 't1')">АНКЕТА</div>
+        <div id="t2" class="tab" onclick="show('rank', 't2')">РЕЙТИНГ</div>
     </div>
 
-    <div id="form" class="container active">
+    <div id="form" class="content active">
         <div class="card">
-            <h2>🦅 AngryCrows Intel</h2>
+            <h3 style="text-align:center; color:#5AC8FA; margin-top:0;">🦅 ANGRY CROWS INTEL</h3>
             <div class="input-group">
-                <label>Callsign (Ник)</label>
-                <input type="text" id="nick" placeholder="Ник...">
+                <label>Позывной (Ник)</label>
+                <input type="text" id="nick" placeholder="Введите ник">
             </div>
             <div class="input-group">
-                <label>Base Resistance</label>
+                <label>Стойкость</label>
                 <input type="number" id="res">
             </div>
             <div class="input-group">
-                <label>Fencor (%)</label>
+                <label>Фенкор (%)</label>
                 <input type="number" id="fc" value="0">
             </div>
             <div class="input-group">
-                <label>Skut-Tum (%)</label>
+                <label>Скут-Тум (%)</label>
                 <input type="number" id="sc" value="0">
             </div>
-            <button class="btn" onclick="executeAction('s')">ПЕРЕДАТЬ ДАННЫЕ</button>
+            <button class="btn" onclick="send('s')">ОТПРАВИТЬ</button>
         </div>
     </div>
 
-    <div id="rank" class="container">
+    <div id="rank" class="content">
         <div class="card">
-            <h2>🏆 GLOBAL RANKING</h2>
-            <button class="btn btn-alt" onclick="executeAction('get_rating')">ВЫВЕСТИ ТОП В ЧАТ</button>
+            <h3 style="text-align:center; color:#5AC8FA; margin-top:0;">🏆 РЕЙТИНГ</h3>
+            <button class="btn btn-alt" onclick="send('get_rating')">ВЫВЕСТИ В ЧАТ</button>
         </div>
     </div>
 
@@ -66,38 +60,37 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        function show(cId, tId) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById('t-' + tabId).classList.add('active');
+            document.getElementById(cId).classList.add('active');
+            document.getElementById(tId).classList.add('active');
         }
 
-        function safeEncode(str) {
-            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => 
-                String.fromCharCode('0x' + p1)));
+        // Правильное кодирование кириллицы (UTF-8 -> Base64)
+        function b64EncodeUnicode(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
         }
 
-        function executeAction(act) {
-            const BOT_NAME = "raven_resist_bot";
-            let payload = { a: act };
-
-            if (act === 's') {
+        function send(action) {
+            let payload = { a: action };
+            if (action === 's') {
                 let n = document.getElementById('nick').value.trim();
                 let r = parseFloat(document.getElementById('res').value);
                 if (!n || isNaN(r)) { tg.showAlert("Заполните ник и стойкость!"); return; }
-                
-                payload.n = n; 
+                payload.n = n;
                 payload.r = r;
                 payload.f = parseFloat(document.getElementById('fc').value || 0);
                 payload.s = parseFloat(document.getElementById('sc').value || 0);
             }
 
             try {
-                let encoded = safeEncode(JSON.stringify(payload));
-                tg.openTelegramLink("https://t.me/" + BOT_NAME + "?start=" + encoded);
-                setTimeout(() => { tg.close(); }, 400);
+                let encoded = b64EncodeUnicode(JSON.stringify(payload));
+                // Используем прямое открытие ссылки
+                tg.openTelegramLink("https://t.me/raven_resist_bot?start=" + encoded);
+                tg.close();
             } catch (e) {
                 alert("Ошибка: " + e.message);
             }
