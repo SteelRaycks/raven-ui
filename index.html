@@ -5,77 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --crow-orange: #FF8C00; --crow-bg: #0d0d0d; }
-        body { font-family: sans-serif; background: var(--crow-bg); color: white; padding: 20px; }
-        .card { background: #1a1a1a; padding: 25px; border-radius: 20px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { color: var(--crow-orange); font-size: 18px; text-align: center; text-transform: uppercase; margin-top: 0; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 10px; color: var(--crow-orange); margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 14px; background: #000; border: 1px solid #444; border-radius: 10px; color: white; box-sizing: border-box; font-size: 16px; }
-        .btn { width: 100%; padding: 18px; background: var(--crow-orange); border: none; border-radius: 12px; color: black; font-weight: 900; font-size: 15px; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        :root { --blue-main: #007AFF; --blue-light: #5AC8FA; --bg: #0A1929; --card: #132F4C; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: white; margin: 0; padding: 0; }
+        
+        .tabs { display: flex; background: rgba(19, 47, 76, 0.8); backdrop-filter: blur(10px); sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { flex: 1; padding: 15px; text-align: center; font-weight: 600; color: #8e8e93; cursor: pointer; transition: 0.3s; }
+        .tab.active { color: var(--blue-light); border-bottom: 3px solid var(--blue-main); }
+
+        .container { padding: 20px; display: none; }
+        .container.active { display: block; }
+
+        .card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); }
+        h2 { color: var(--blue-light); text-align: center; margin-top: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .input-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--blue-light); margin-bottom: 6px; opacity: 0.8; }
+        input { width: 100%; padding: 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-sizing: border-box; font-size: 16px; background: #001E3C; color: white; outline: none; }
+        input:focus { border-color: var(--blue-main); }
+        
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; color: white; font-weight: 800; font-size: 14px; cursor: pointer; background: linear-gradient(45deg, #007AFF, #0059B2); transition: 0.2s; text-transform: uppercase; }
+        .btn:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-refresh { background: #173A5E; border: 1px solid var(--blue-main); margin-bottom: 15px; }
     </style>
 </head>
 <body>
-    <h1>🦅 AngryCrows Intelligence</h1>
-    <div class="card">
-        <div class="input-group">
-            <label>CALLSIGN (НИК)</label>
-            <input type="text" id="nick" placeholder="Введите ник...">
+    <div class="tabs">
+        <div id="t-form" class="tab active" onclick="switchTab('form')">АНКЕТА</div>
+        <div id="t-rank" class="tab" onclick="switchTab('rank')">РЕЙТИНГ</div>
+    </div>
+
+    <div id="form" class="container active">
+        <div class="card">
+            <h2>🦅 AngryCrows Intel</h2>
+            <div class="input-group">
+                <label>ПОЗЫВНОЙ (НИК)</label>
+                <input type="text" id="nick" placeholder="Введите ник...">
+            </div>
+            <div class="input-group">
+                <label>СТОЙКОСТЬ (RESISTANCE)</label>
+                <input type="number" id="res" placeholder="Чистое значение">
+            </div>
+            <div class="input-group">
+                <label>СИМВОЛЫ ФЕНКОРА (%)</label>
+                <input type="number" id="fc" value="0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>СИМВОЛЫ СКУТ-ТУМ (%)</label>
+                <input type="number" id="sc" value="0" step="0.1">
+            </div>
+            <button class="btn" onclick="execute('s')">ОТПРАВИТЬ ОТЧЕТ</button>
         </div>
-        <div class="input-group">
-            <label>RESISTANCE (СТОЙКОСТЬ)</label>
-            <input type="number" id="res">
+    </div>
+
+    <div id="rank" class="container">
+        <div class="card">
+            <h2>🏆 ТОП ОПЕРАТИВНИКОВ</h2>
+            <button class="btn btn-refresh" onclick="execute('get_rating')">ОБНОВИТЬ СПИСОК</button>
+            <p style="font-size: 12px; color: #8e8e93; text-align: center;">Нажмите кнопку выше, чтобы бот вывел актуальный рейтинг в чат.</p>
         </div>
-        <div class="input-group">
-            <label>FENCOR SYMBOLS (%)</label>
-            <input type="number" id="fc" value="0" step="0.1">
-        </div>
-        <div class="input-group">
-            <label>SKUT-TUM (%)</label>
-            <input type="number" id="sc" value="0" step="0.1">
-        </div>
-        <button class="btn" onclick="sendData()">Отправить в штаб</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        tg.headerColor = '#0A1929';
 
-        // Функция кодирования, которая НЕ БОИТСЯ русских букв
-        function safeEncode(str) {
-            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-                return String.fromCharCode('0x' + p1);
-            }));
+        function switchTab(t) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            document.getElementById(t).classList.add('active');
+            document.getElementById('t-' + t).classList.add('active');
         }
 
-        function sendData() {
+        function safeEncode(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => 
+                String.fromCharCode('0x' + p1)));
+        }
+
+        function execute(action) {
             const BOT_NAME = "raven_resist_bot";
-            let nick = document.getElementById('nick').value.trim();
-            let res = parseFloat(document.getElementById('res').value);
+            let payload = { a: action };
 
-            if (!nick || isNaN(res)) {
-                tg.showAlert("Ошибка: Укажите ник и стойкость!");
-                return;
+            if (action === 's') {
+                let n = document.getElementById('nick').value.trim();
+                let r = parseFloat(document.getElementById('res').value);
+                if (!n || isNaN(r)) { tg.showAlert("Заполните ник и стойкость!"); return; }
+                payload.n = n; payload.r = r;
+                payload.f = parseFloat(document.getElementById('fc').value || 0);
+                payload.s = parseFloat(document.getElementById('sc').value || 0);
             }
 
-            let payload = {
-                a: "s",
-                n: nick,
-                r: res,
-                f: parseFloat(document.getElementById('fc').value || 0),
-                s: parseFloat(document.getElementById('sc').value || 0)
-            };
-
-            try {
-                let encoded = safeEncode(JSON.stringify(payload));
-                let link = `https://t.me/${BOT_NAME}?start=${encoded}`;
-                
-                // Сначала открываем ссылку, потом закрываем приложение
-                tg.openTelegramLink(link);
-                setTimeout(() => { tg.close(); }, 350);
-            } catch (e) {
-                tg.showAlert("JS ERROR: " + e.message);
-            }
+            let encoded = safeEncode(JSON.stringify(payload));
+            tg.openTelegramLink(`https://t.me/${BOT_NAME}?start=${encoded}`);
+            setTimeout(() => { tg.close(); }, 400);
         }
     </script>
 </body>
